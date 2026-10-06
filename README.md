@@ -20,6 +20,7 @@ The build uses relative asset paths and can be served from a subfolder.
 - `src/components/VideoDialog.tsx` selects the wide or vertical video.
 - `public/video/` contains both video files.
 - `src/style.css` contains the layout and animations.
+- `privacy.html` is the privacy policy, a static page built alongside `index.html` (see `vite.config.ts`). Update it when the app's data handling changes, for example when cloud backup sign-in ships.
 
 The carousel pauses when hovered, when the video is open or when the tab is hidden. It stays still when reduced motion is enabled.
 

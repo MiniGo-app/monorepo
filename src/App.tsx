@@ -17,6 +17,9 @@ export function App() {
         <Header onOpenTry={() => setOpenDialog("try")} />
         <Showcase paused={openDialog !== null} />
         <Hero onOpenTry={() => setOpenDialog("try")} onOpenHow={() => setOpenDialog("how")} />
+        <a className="legal" href="privacy.html">
+          Privacy
+        </a>
       </div>
 
       <Dialog open={openDialog === "try"} onClose={close} titleId="tryTitle" title="Android build coming soon">
