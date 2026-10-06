@@ -1,35 +1,29 @@
 # MiniGo landing page
 
-MiniGo's public landing page. Built with React, TypeScript and Vite.
+MiniGo's landing page, built with React, TypeScript and Vite. It has a seven-slide carousel and two cuts of the pitch video.
 
 ## Run it
 
 ```bash
-cd minigo-landing
 npm install
 npm run dev        # http://localhost:5173
-npm run build      # type-checks, then builds the static site in dist/
-npm run preview    # serve the built site
+npm run build      # type-checks, then builds dist/
+npm run preview
 ```
 
-The build in `dist/` uses relative asset paths and can be served from a subfolder.
+The build uses relative asset paths and can be served from a subfolder.
 
-## Structure
+## Files
 
-- `src/App.tsx` assembles the page.
-- `src/components/` contains the header, hero, paper roll and dialogs.
-- `src/lib/` contains the roll, feed and torn-edge animation code.
-- `src/data/apps.ts` holds the apps shown on the paper.
-- `src/style.css` holds the layout and motion styles.
+- `src/components/Showcase.tsx` controls the carousel.
+- `src/illustrations/` contains its line drawings.
+- `src/components/VideoDialog.tsx` selects the wide or vertical video.
+- `public/video/` contains both video files.
+- `src/style.css` contains the layout and animations.
 
-The feed updates the paper list directly through a React ref. This keeps the timed row growth and removal in one place. Reduced-motion users see the paper open and static.
+The carousel pauses when hovered, when the video is open or when the tab is hidden. It stays still when reduced motion is enabled.
 
-## The apps
+## Before launch
 
-The first six entries match the app catalogue. Swap and Tickets are examples and the page labels them as such. Edit `src/data/apps.ts` when the catalogue changes.
-
-## Before it goes public
-
-- Replace the testnet instructions with store links when builds are available.
-- Point the GitHub link to the app repository after it exists. It currently points to the MiniGo organization.
-- Review the backup copy before launch. Cloud sign-in is not built yet; the encrypted backup currently stays on the phone.
+- Add the Android download when a public APK is available. Add an iPhone link when there is a build to share.
+- Point GitHub links to the app repository once it is public. They currently open the organization page.

@@ -1,15 +1,17 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
-// Native <dialog> gives Escape, focus handling and the backdrop for free; we just drive open/close from React state.
+// The native <dialog> handles Escape, focus and the backdrop.
 interface DialogProps {
   open: boolean;
   onClose: () => void;
   titleId: string;
   title: string;
+  hideTitle?: boolean;
+  className?: string;
   children: ReactNode;
 }
 
-export function Dialog({ open, onClose, titleId, title, children }: DialogProps) {
+export function Dialog({ open, onClose, titleId, title, hideTitle, className, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -40,8 +42,10 @@ export function Dialog({ open, onClose, titleId, title, children }: DialogProps)
   }, [onClose]);
 
   return (
-    <dialog ref={ref} aria-labelledby={titleId}>
-      <h2 id={titleId}>{title}</h2>
+    <dialog ref={ref} aria-labelledby={titleId} className={className}>
+      <h2 id={titleId} className={hideTitle ? "sr" : undefined}>
+        {title}
+      </h2>
       {children}
     </dialog>
   );
