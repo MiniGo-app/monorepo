@@ -13,15 +13,11 @@ import { cloudProvider } from "@/wallet/cloud";
 const faqs = [
   {
     q: "How does the backup work?",
-    a: `When you sign up, MiniGo makes a 12-word recovery phrase on your phone, encrypts it with a password you choose and saves the encrypted file to a private app folder in your ${cloudProvider.name}. MiniGo never sees the words or the password.`,
+    a: `When you sign up, MiniGo makes a 12-word recovery phrase on your phone, encrypts it and saves it to a private app folder in your ${cloudProvider.name}. There's no password to remember: your Google account protects it, so keep that account secure.`,
   },
   {
     q: "What if I lose my phone?",
-    a: `Install MiniGo on the new phone, choose "I already have a wallet" and restore from ${cloudProvider.name} with your backup password, or type your recovery phrase.`,
-  },
-  {
-    q: "What if I forget my backup password?",
-    a: "We can't reset it. That's what keeps the backup private. If you still have this phone, back up again with a new password from Recovery & backup. You can also write down your recovery phrase as a second backup.",
+    a: `Install MiniGo on the new phone, choose "I already have a wallet" and restore from ${cloudProvider.name} by signing in to the same Google account. You can also type your recovery phrase.`,
   },
   {
     q: "What can I hold and send?",

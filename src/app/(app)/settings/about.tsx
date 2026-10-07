@@ -16,7 +16,7 @@ const features: { icon: LucideIcon; label: string; detail: string }[] = [
   { icon: Send, label: "Send to a Stellar address", detail: "Type it, paste it or scan its QR code. You approve with your PIN." },
   { icon: AppWindow, label: "Use mini apps", detail: "Small apps that run inside MiniGo and can ask to be paid from your wallet." },
   { icon: KeyRound, label: "You hold the keys", detail: "Your recovery phrase is made on this phone. MiniGo never sees it." },
-  { icon: CloudUpload, label: "Encrypted backup", detail: `Saved to your ${cloudProvider.name} under a password only you know, so you can restore on a new phone.` },
+  { icon: CloudUpload, label: "Automatic backup", detail: `Encrypted and saved to your ${cloudProvider.name}, so signing in on a new phone brings your wallet back.` },
 ];
 
 export default function AboutScreen() {

@@ -1,5 +1,3 @@
-// Must stay first.
-import "@/polyfills";
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold, useFonts } from "@expo-google-fonts/geist";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";

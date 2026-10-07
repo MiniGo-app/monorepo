@@ -6,22 +6,32 @@ import { Notice } from "@/components/Notice";
 import { StackScreen } from "@/components/StackScreen";
 import { Text } from "@/components/Text";
 import { useTheme } from "@/theme/ThemeProvider";
+import { openBackup } from "@/wallet/backup";
 import { cloud, cloudProvider } from "@/wallet/cloud";
 import { CloudSignInError, googleSignInAvailable, signOutOfGoogle } from "@/wallet/googleAuth";
+import { useOnboarding } from "@/wallet/onboarding";
 
 export default function RestoreScreen() {
   const { colors } = useTheme();
   const router = useRouter();
+  const { startRestore, update } = useOnboarding();
   const [checking, setChecking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
 
   const fromCloud = async () => {
     setChecking(true);
     setProblem(null);
+    let opening = false;
     try {
       const file = await cloud.load();
-      if (file) router.push("/onboarding/restore-password");
-      else {
+      if (file) {
+        // The backup needs nothing more: the wallet is restored straight away.
+        opening = true;
+        const draft = await startRestore(await openBackup(file));
+        if (draft.address !== file.address) throw new Error("Backup doesn't match its wallet");
+        update({ backup: { method: cloudProvider.id, at: file.createdAt, live: cloud.live } });
+        router.push("/onboarding/details");
+      } else {
         // Maybe the wrong account: forget it, so trying again asks which one to use.
         await signOutOfGoogle();
         setProblem(
@@ -31,7 +41,13 @@ export default function RestoreScreen() {
         );
       }
     } catch (caught) {
-      setProblem(caught instanceof CloudSignInError ? caught.message : `Couldn't reach ${cloudProvider.name}. Check your connection and try again.`);
+      setProblem(
+        caught instanceof CloudSignInError
+          ? caught.message
+          : opening
+            ? "This backup couldn't be opened. Restore with your recovery phrase instead."
+            : `Couldn't reach ${cloudProvider.name}. Check your connection and try again.`,
+      );
     } finally {
       setChecking(false);
     }
@@ -70,7 +86,7 @@ export default function RestoreScreen() {
           Bring your wallet to this phone with your backup.
         </Text>
         <View style={styles.options}>
-          {option(Cloud, `From ${cloudProvider.name}`, "Use your backup password", fromCloud, checking)}
+          {option(Cloud, `From ${cloudProvider.name}`, googleSignInAvailable ? "Sign in with the same Google account" : "Nothing to type", fromCloud, checking)}
           {option(KeyRound, "With your recovery phrase", "Type the 12 or 24 words you wrote down", () => router.push("/onboarding/restore-phrase"))}
         </View>
         {problem && (

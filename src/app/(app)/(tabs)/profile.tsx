@@ -142,7 +142,7 @@ export default function ProfileScreen() {
           </Text>
           <Text size={14} color={colors.muted} style={[styles.center, styles.sheetBody]}>
             This removes the wallet from this phone. You&apos;ll need your{" "}
-            {backup?.method === "manual" ? "recovery phrase" : `${cloudProvider.name} backup and its password`} to sign back in.
+            {backup?.method === "manual" ? "recovery phrase" : `Google account (for your ${cloudProvider.name} backup)`} to sign back in.
           </Text>
           {!backup && (
             <View style={styles.sheetNotice}>

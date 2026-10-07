@@ -1,30 +1,54 @@
 import { Redirect, useRouter } from "expo-router";
-import { Cloud, KeyRound, LockKeyhole, type LucideIcon } from "lucide-react-native";
+import { Cloud, KeyRound, ShieldCheck, type LucideIcon } from "lucide-react-native";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button } from "@/components/Button";
+import { Notice } from "@/components/Notice";
 import { StackScreen } from "@/components/StackScreen";
 import { Text } from "@/components/Text";
+import { useToast } from "@/components/Toast";
 import { useTheme } from "@/theme/ThemeProvider";
-import { cloudProvider } from "@/wallet/cloud";
+import { sealBackup } from "@/wallet/backup";
+import { cloud, cloudProvider } from "@/wallet/cloud";
+import { CloudSignInError } from "@/wallet/googleAuth";
 import { useOnboarding } from "@/wallet/onboarding";
 
 export default function BackupIntroScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const { draft } = useOnboarding();
+  const toast = useToast();
+  const { draft, update } = useOnboarding();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   if (!draft) return <Redirect href="/onboarding" />;
 
   const points: { icon: LucideIcon; title: string; body: string }[] = [
     { icon: KeyRound, title: "Your recovery phrase", body: "12 words that are the only key to this wallet. We made them on this phone." },
-    { icon: LockKeyhole, title: "Encrypted before it leaves", body: "Sealed with a password only you know. MiniGo never sees the words or the password." },
+    { icon: ShieldCheck, title: "Nothing to remember", body: "Encrypted by MiniGo and protected by your Google account. Sign in on a new phone and your wallet is back." },
     { icon: Cloud, title: `Kept in your ${cloudProvider.name}`, body: `Stored in a private app folder, so a new phone can restore everything.` },
   ];
+
+  const backUp = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const file = await sealBackup(draft.phrase, draft.address);
+      await cloud.save(file);
+      update({ backup: { method: cloudProvider.id, at: file.createdAt, live: cloud.live } });
+      toast(`Backed up to ${cloudProvider.name}`);
+      router.push("/onboarding/details");
+    } catch (caught) {
+      setError(caught instanceof CloudSignInError ? caught.message : `Couldn't reach ${cloudProvider.name}. Check your connection and try again.`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <StackScreen
       footer={
         <>
-          <Button label={`Back up to ${cloudProvider.name}`} icon={Cloud} onPress={() => router.push("/onboarding/backup-password")} />
+          <Button label={saving ? `Saving to ${cloudProvider.name}…` : `Back up to ${cloudProvider.name}`} icon={Cloud} onPress={backUp} loading={saving} />
           <Button label="Write it down instead" variant="ghost" onPress={() => router.push("/onboarding/phrase")} />
         </>
       }
@@ -55,6 +79,13 @@ export default function BackupIntroScreen() {
             </View>
           ))}
         </View>
+        {error && (
+          <View style={styles.error}>
+            <Notice icon={Cloud} tone="warning">
+              {error}
+            </Notice>
+          </View>
+        )}
       </View>
     </StackScreen>
   );
@@ -69,4 +100,5 @@ const styles = StyleSheet.create({
   pointIcon: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   pointText: { flex: 1 },
   pointBody: { marginTop: 3, lineHeight: 19 },
+  error: { marginTop: 16 },
 });

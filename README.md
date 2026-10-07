@@ -56,7 +56,7 @@ The recovery phrase is kept in a Keychain or Keystore item that the OS only rele
 
 ## Cloud backup
 
-The backup is a small JSON file (`src/wallet/backup.ts`): the phrase sealed with AES-256-GCM under a key stretched from the backup password with scrypt, with the address bound in. Only that file leaves the phone.
+The backup is a small JSON file (`src/wallet/backup.ts`) with no password: the recovery phrase sealed with AES-256-GCM under a key built into the app, so a file taken out of Drive is unreadable without MiniGo, and restoring is just signing in to the same Google account. See SECURITY_REVIEW.md item 6 for the trade-off and TODO.md for the planned fix.
 
 `src/wallet/cloud.ts` stores it through an adapter:
 
@@ -64,8 +64,6 @@ The backup is a small JSON file (`src/wallet/backup.ts`): the phrase sealed with
 - Expo Go, the web preview and iOS: the file stays on the device. Google sign-in is native code that Expo Go can't run, and iCloud needs a container entitlement and a native module behind the same `CloudAdapter` interface.
 
 Google setup lives in the MiniGo Google Cloud project: the Drive API, the consent screen (published, `drive.appdata` only) and two OAuth clients. The web client's ID is in `googleAuth.ts`. The Android client is matched by Google from the package name `app.minigo.wallet` and the SHA-1 of the signing key, so any build signed with a different key (for example a local debug build) needs its own Android client in the project. The library's Expo config plugin isn't in `app.json`: without options it switches to Firebase setup, and with options it only configures iOS. Add it with an `iosUrlScheme` once there is an iOS client.
-
-scrypt runs in JS and takes a few seconds on a phone, so the buttons show progress.
 
 ## Stellar on React Native
 
