@@ -11,6 +11,7 @@ import { useToast } from "@/components/Toast";
 import { useTheme } from "@/theme/ThemeProvider";
 import { sealBackup } from "@/wallet/backup";
 import { cloud, cloudProvider } from "@/wallet/cloud";
+import { CloudSignInError } from "@/wallet/googleAuth";
 import { useOnboarding } from "@/wallet/onboarding";
 
 type Stage = "idle" | "encrypting" | "uploading";
@@ -36,8 +37,8 @@ export default function BackupPasswordScreen() {
       update({ backup: { method: cloudProvider.id, at: file.createdAt, live: cloud.live } });
       toast(`Backed up to ${cloudProvider.name}`);
       router.push("/onboarding/details");
-    } catch {
-      setError(`Couldn't reach ${cloudProvider.name}. Check your connection and try again.`);
+    } catch (caught) {
+      setError(caught instanceof CloudSignInError ? caught.message : `Couldn't reach ${cloudProvider.name}. Check your connection and try again.`);
     } finally {
       setStage("idle");
     }

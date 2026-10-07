@@ -8,7 +8,7 @@ export default function AppLayout() {
     <OpenAppsProvider>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
         <Stack.Screen name="(tabs)" />
-        {/* Mini apps run in the open-apps layer; these routes only open one (deep links) and step back. */}
+        {/* These routes only open a mini app from a deep link and step back. */}
         <Stack.Screen name="mini/[appId]" options={{ animation: "none" }} />
         <Stack.Screen name="mini/web" options={{ animation: "none" }} />
         <Stack.Screen name="scan" options={{ animation: "slide_from_bottom" }} />

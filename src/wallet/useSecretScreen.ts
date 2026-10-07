@@ -4,9 +4,8 @@ import { Platform } from "react-native";
 
 const KEY = "minigo-secret-screen";
 
-// While a screen showing or taking the recovery phrase is open: no screenshots or screen recording (Android blocks
-// both and blanks the app in Recents; iOS blanks recordings and mirroring), and on iOS the app blurs in the app
-// switcher. Screenshots on iOS can't be blocked by any app; the phrase screen already warns against them.
+// Blocks screenshots and recording on Android, blanks recordings on iOS and blurs the app in the iOS app switcher.
+// No app can block screenshots on iOS.
 export function useSecretScreen() {
   useEffect(() => {
     if (Platform.OS === "web") return;

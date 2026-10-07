@@ -27,8 +27,7 @@ export default function AmountScreen() {
   const { account } = useChain();
   const recipient = parseRecipient(params.to ?? "");
   const assets = walletAssets(account);
-  // A payment code may ask for an asset this wallet doesn't hold. Then nothing is prefilled: the requested amount
-  // was in that asset, and silently switching it to XLM would send something else entirely.
+  // If a payment code asks for an asset this wallet doesn't hold, prefill nothing rather than switch to XLM.
   const requestedMissing = !!params.asset && !assets.some((a) => a.key === params.asset);
   const [assetKey, setAssetKey] = useState(requestedMissing || !params.asset ? "XLM" : params.asset);
   const [amount, setAmount] = useState(requestedMissing ? "0" : (cleanAmount(params.amount ?? "0") ?? "0"));
@@ -36,7 +35,7 @@ export default function AmountScreen() {
   const asset = assets.find((a) => a.key === assetKey) ?? assets[0];
   const available = asset.isNative ? (account?.exists ? spendableXlm(account) : 0) : asset.balance;
   const value = Number(amount);
-  // In stroops: floating point would call "Max" of 9989.4899999 more than 9989.489999899999 available.
+  // Compared in stroops to avoid floating point errors.
   const tooMuch = toStroops(value) > toStroops(available);
 
   if (!recipient || recipient.kind !== "address") {

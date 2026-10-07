@@ -2,8 +2,7 @@ import type { MiniApp } from "@/data/miniApps";
 import type { Palette } from "@/theme/colors";
 import { glyphs } from "@/mini/glyphs";
 
-// Stand-in pages for partner mini apps until they are served from their own URLs. They talk to
-// MiniGo only through `window.mini`, exactly as a real mini app would.
+// Placeholder pages for catalogue apps without a live site. They only use `window.mini`, like a real mini app.
 
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
@@ -11,15 +10,12 @@ const escapeHtml = (value: string) =>
 const svg = (name: string, size: number, stroke = 1.8) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${glyphs[name] ?? ""}</svg>`;
 
-// Demo merchant for the stand-in pages' testnet payments (a valid Stellar address, not a real business). If the
-// testnet has no account for it (e.g. after a testnet reset), the first XLM payment creates it.
+// A valid testnet address, not a real business. The first XLM payment creates it after a testnet reset.
 const DEMO_MERCHANT = "GBAW5XGWORWVFE2XTJYDTLDHXTY2Q2MO73HYCGB3XMFMQ562Q2W2GJQX";
 
 type PaymentDemo = { amount: string; memo: string; payLabel: string; paidLabel: string };
 
-// Shared script: the first tap asks MiniGo for wallet access, later taps ask for a testnet payment. Every
-// answer, including a decline, is reflected in the page. `window.mini` follows SEP-43: calls resolve with
-// `{ error }` instead of throwing (-4 means the user declined).
+// The first tap connects, later taps ask for a payment. A decline comes back as `{ error }` with code -4.
 const walletScript = (payment: PaymentDemo) => `(function () {
   var buttons = document.querySelectorAll("[data-connect]");
   var statusLine = document.getElementById("status");

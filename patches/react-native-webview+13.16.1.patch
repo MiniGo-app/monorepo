@@ -1,0 +1,34 @@
+diff --git a/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java b/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
+index 07f73fd..9056940 100644
+--- a/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
++++ b/node_modules/react-native-webview/android/src/main/java/com/reactnativecommunity/webview/RNCWebChromeClient.java
+@@ -151,10 +151,11 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
+         for (String requestedResource : request.getResources()) {
+             String androidPermission = null;
+ 
+-            if (requestedResource.equals(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
+-                androidPermission = Manifest.permission.RECORD_AUDIO;
+-            } else if (requestedResource.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
+-                androidPermission = Manifest.permission.CAMERA;
++            // MiniGo: this WebView only runs mini apps, which never get the camera or microphone. Every frame's
++            // request comes through here, so refusing here (without asking the user) covers iframes too.
++            if (requestedResource.equals(PermissionRequest.RESOURCE_AUDIO_CAPTURE)
++                    || requestedResource.equals(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
++                continue;
+             } else if(requestedResource.equals(PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID)) {
+                 if (mAllowsProtectedMedia) {
+                   grantedPermissions.add(requestedResource);
+@@ -178,6 +179,13 @@ public class RNCWebChromeClient extends WebChromeClient implements LifecycleEven
+             }
+         }
+ 
++        // MiniGo: nothing left to grant (a camera or microphone request) is a refusal, not an empty grant.
++        if (requestedAndroidPermissions.isEmpty() && grantedPermissions.isEmpty()) {
++            request.deny();
++            grantedPermissions = null;
++            return;
++        }
++
+         // If all the permissions are already granted, send the response to the WebView synchronously
+         if (requestedAndroidPermissions.isEmpty()) {
+             request.grant(grantedPermissions.toArray(new String[0]));

@@ -34,7 +34,7 @@ function Preview({ mode }: { mode: ColorMode }) {
   );
 }
 
-// Light on the left, dark on the right: the same preview, cut down the middle.
+// Light on the left, dark on the right.
 function SplitPreview() {
   const [width, setWidth] = useState(0);
   return (

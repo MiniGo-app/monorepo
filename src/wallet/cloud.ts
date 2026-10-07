@@ -1,25 +1,25 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import { isBackupFile, type BackupFile } from "@/wallet/backup";
+import { driveAccessToken, forgetDriveToken, googleSignInAvailable } from "@/wallet/googleAuth";
+import { googleDriveAdapter } from "@/wallet/googleDrive";
 
-// Where the encrypted backup lives: Google Drive's hidden app folder on Android, iCloud on iOS.
+// Google Drive's hidden app folder on Android, iCloud on iOS.
 export type CloudProviderId = "google-drive" | "icloud";
 
 export const cloudProvider: { id: CloudProviderId; name: string } =
   Platform.OS === "ios" ? { id: "icloud", name: "iCloud" } : { id: "google-drive", name: "Google Drive" };
 
 export type CloudAdapter = {
-  // False while the adapter only simulates the cloud on this device.
+  // False while the backup only stays on this device.
   live: boolean;
   save: (file: BackupFile) => Promise<void>;
   load: () => Promise<BackupFile | null>;
   remove: () => Promise<void>;
 };
 
-export const BACKUP_FILE_NAME = "minigo-wallet-backup.json";
-
-// Stand-in until Google Sign-In (Android) and an iCloud container (iOS) are configured. Both need a
-// development build. The file it keeps is the same encrypted file the real adapters upload.
+// Used where Google sign-in can't run (Expo Go, the web preview) and on iOS until iCloud is set up. It keeps the same
+// encrypted file on the device.
 const SIMULATED_KEY = "minigo-simulated-cloud-backup";
 const simulatedAdapter: CloudAdapter = {
   live: false,
@@ -37,7 +37,7 @@ const simulatedAdapter: CloudAdapter = {
   remove: () => AsyncStorage.removeItem(SIMULATED_KEY),
 };
 
-let adapter = simulatedAdapter;
+let adapter = googleSignInAvailable ? googleDriveAdapter(driveAccessToken, forgetDriveToken) : simulatedAdapter;
 
 export function setCloudAdapter(next: CloudAdapter) {
   adapter = next;

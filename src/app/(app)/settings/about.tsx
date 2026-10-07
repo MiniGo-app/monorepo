@@ -10,7 +10,7 @@ import { isTestnet } from "@/stellar/network";
 import { useTheme } from "@/theme/ThemeProvider";
 import { cloudProvider } from "@/wallet/cloud";
 
-// A quick tour of what MiniGo is, in plain words. Keep it short and true: it says what the app does today.
+// Keep this true to what the app does today.
 const features: { icon: LucideIcon; label: string; detail: string }[] = [
   { icon: Wallet, label: "Hold XLM, USDC and more", detail: "Add any Stellar token you trust in Manage assets." },
   { icon: Send, label: "Send to a Stellar address", detail: "Type it, paste it or scan its QR code. You approve with your PIN." },

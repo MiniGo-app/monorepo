@@ -33,10 +33,6 @@ export function fromBase64(text: string) {
   return out;
 }
 
-export function toHex(bytes: Uint8Array) {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
 // Constant-time comparison for secrets.
 export function equalBytes(a: Uint8Array, b: Uint8Array) {
   if (a.length !== b.length) return false;

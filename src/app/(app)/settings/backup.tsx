@@ -14,6 +14,7 @@ import { useToast } from "@/components/Toast";
 import { useTheme } from "@/theme/ThemeProvider";
 import { sealBackup } from "@/wallet/backup";
 import { cloud, cloudProvider } from "@/wallet/cloud";
+import { CloudSignInError } from "@/wallet/googleAuth";
 import { useWallet, useWalletData } from "@/wallet/WalletProvider";
 
 const dateLabel = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -48,8 +49,8 @@ export default function BackupSettingsScreen() {
       setBackup({ method: cloudProvider.id, at: file.createdAt, live: cloud.live });
       setPhrase(null);
       toast(`Backed up to ${cloudProvider.name}`);
-    } catch {
-      toast(`Couldn't reach ${cloudProvider.name}. Try again.`);
+    } catch (caught) {
+      toast(caught instanceof CloudSignInError ? caught.message : `Couldn't reach ${cloudProvider.name}. Try again.`);
     } finally {
       setSaving(false);
     }

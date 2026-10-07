@@ -1,5 +1,4 @@
-// Web preview only: browsers have no secure enclave, so secrets fall back to localStorage. Never ship
-// the wallet on web with this.
+// Web preview only. Secrets end up in localStorage, so never ship the wallet on web with this.
 const prefix = "minigo-dev-vault:";
 
 export const vault = {

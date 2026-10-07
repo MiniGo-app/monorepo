@@ -5,8 +5,7 @@ const sizes = {
   sm: { fill: { size: 240, right: -100, top: -150 }, ring: { size: 300, right: -140, top: -200 } },
 };
 
-// The one faint circle + ring in a card's top-right corner. It must stay above the card's divider,
-// so shorter cards use the small size.
+// It has to stay above the card's divider, so shorter cards use the small size.
 export function CardRings({ color, size = "lg" }: { color: string; size?: keyof typeof sizes }) {
   const { fill, ring } = sizes[size];
   return (

@@ -17,9 +17,8 @@ import type { HostedApp } from "./types";
 
 export { useOpenApps };
 
-// Open mini apps stay running while you use the wallet or another app, so switching back finds each one where you
-// left it. They are rendered here, above the app's screens, rather than as routes: a route is torn down when you
-// leave it. Locking the wallet unmounts this layer, which closes them all (and declines anything they were asking).
+// Open mini apps are rendered here above the screens instead of as routes, so they keep running when you leave
+// them. Locking the wallet unmounts this layer and closes them all.
 
 export function OpenAppsProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -27,14 +26,13 @@ export function OpenAppsProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<core.OpenAppsState<HostedApp>>({ apps: [], activeId: null });
   const [waiting, setWaitingMap] = useState<Record<string, number>>({});
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  // 0: the active app covers the screen. 1: it is slid away below.
+  // 0 is on screen, 1 is slid away.
   const [slide] = useState(() => new Animated.Value(1));
 
   const show = useCallback(() => {
     Animated.timing(slide, { toValue: 0, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [slide]);
-  // Slides the app away first, then applies the change, so it doesn't vanish before it has moved. A minimize that
-  // is cut short (another app opened meanwhile) is dropped; a close always happens.
+  // A minimize cut short by another app opening is dropped. A close always happens.
   const hideThen = useCallback(
     (change: (current: core.OpenAppsState<HostedApp>) => core.OpenAppsState<HostedApp>, always = false) => {
       Animated.timing(slide, { toValue: 1, duration: 220, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(({ finished }) => {
@@ -75,7 +73,7 @@ export function OpenAppsProvider({ children }: { children: ReactNode }) {
   );
   const setWaiting = useCallback((id: string, count: number) => setWaitingMap((current) => ({ ...current, [id]: count })), []);
 
-  // Android back minimizes the app on screen (sheets inside it handle back themselves first).
+  // Android back minimizes the app on screen.
   const active = state.activeId !== null;
   useEffect(() => {
     if (!active) return;
@@ -95,7 +93,6 @@ export function OpenAppsProvider({ children }: { children: ReactNode }) {
 
   return (
     <OpenAppsContext.Provider value={value}>
-      {/* While an app is on screen, the wallet screens under it are hidden from screen readers. */}
       <View style={styles.flex} importantForAccessibility={active ? "no-hide-descendants" : "auto"} accessibilityElementsHidden={active}>
         {children}
       </View>
@@ -118,7 +115,6 @@ export function OpenAppsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Opens a catalogue app by id or any http(s) URL; returns false if there is nothing to open. */
 export function useLaunchMiniApp() {
   const { launch } = useOpenApps();
   const { colors } = useTheme();

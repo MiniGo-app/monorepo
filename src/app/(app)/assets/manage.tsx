@@ -17,8 +17,7 @@ import { USDC, describeAsset, formatAmount, keyOf, walletAssets } from "@/stella
 import { useTheme } from "@/theme/ThemeProvider";
 import { errorMessage, useChain, useWallet } from "@/wallet/WalletProvider";
 
-// Assets are trustlines on the network: adding one reserves the network's base reserve (0.5 XLM today), and
-// removing it (at zero balance) frees it. The amount is read from the network, not assumed.
+// Each trustline reserves the network's base reserve, read from the ledger. Removing one at zero balance frees it.
 
 type Pending = { asset: Asset; remove: boolean };
 
@@ -42,7 +41,7 @@ export default function ManageAssetsScreen() {
 
   const trimmedCode = code.trim().toUpperCase();
   const trimmedIssuer = issuer.trim().toUpperCase();
-  const codeError = trimmedCode && !CODE_PATTERN.test(trimmedCode) ? "1–12 letters or digits" : null;
+  const codeError = trimmedCode && !CODE_PATTERN.test(trimmedCode) ? "1 to 12 letters or digits" : null;
   const issuerError = trimmedIssuer && !StrKey.isValidEd25519PublicKey(trimmedIssuer) ? "Not a valid Stellar address" : null;
   const custom = trimmedCode && trimmedIssuer && !codeError && !issuerError ? new Asset(trimmedCode, trimmedIssuer) : null;
   const customExists = custom ? assets.some((asset) => asset.key === keyOf(custom)) : false;

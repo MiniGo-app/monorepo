@@ -1,9 +1,8 @@
 import type { Transaction } from "@/data/transactions";
 import { NETWORK } from "./network";
 
-// Payments in and out of the account, newest first, from Horizon's payments endpoint (with each payment's
-// transaction joined in for the memo and fee). Payments a mini app asked for are labelled from local notes
-// with `labelAppPayments`, at render time, so a note added after a fetch still shows.
+// Payments in and out, newest first, with each transaction joined in for the memo and fee. Mini app payments are
+// labelled at render time by `labelAppPayments`.
 
 export type AppNote = { appId: string; appName: string };
 
@@ -92,7 +91,6 @@ export async function fetchHistory(address: string, limit = 50): Promise<Transac
   return out;
 }
 
-/** Marks outgoing payments that a mini app asked for, from the notes kept when they were approved. */
 export function labelAppPayments(history: Transaction[], notes: { [hash: string]: AppNote }): Transaction[] {
   return history.map((tx) => {
     const note = tx.kind === "sent" ? notes[tx.hash] : undefined;

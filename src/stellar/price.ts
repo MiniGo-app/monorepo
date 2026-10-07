@@ -23,7 +23,7 @@ export function useXlmPrice() {
     const load = () =>
       fetchPrice().then(
         (p) => alive && setPrice(p),
-        // Try again later; the balance shows "—" until then.
+        // Try again later. The total shows "..." until then.
         () => {
           if (alive) timer = setTimeout(load, RETRY_MS);
         },

@@ -3,8 +3,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { deriveAccount, normalizePhrase, phraseFromEntropy } from "./stellar";
 import type { BackupInfo, Profile } from "./WalletProvider";
 
-// What sign-up or restore has collected so far. Held in memory only; nothing is saved until the PIN
-// is set and the wallet is created.
+// Held in memory only. Nothing is saved until the PIN is set and the wallet is created.
 export type Draft = {
   mode: "create" | "restore";
   phrase: string;

@@ -7,22 +7,31 @@ import { StackScreen } from "@/components/StackScreen";
 import { Text } from "@/components/Text";
 import { useTheme } from "@/theme/ThemeProvider";
 import { cloud, cloudProvider } from "@/wallet/cloud";
+import { CloudSignInError, googleSignInAvailable, signOutOfGoogle } from "@/wallet/googleAuth";
 
 export default function RestoreScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const [checking, setChecking] = useState(false);
-  const [missing, setMissing] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
 
   const fromCloud = async () => {
     setChecking(true);
-    setMissing(false);
+    setProblem(null);
     try {
       const file = await cloud.load();
       if (file) router.push("/onboarding/restore-password");
-      else setMissing(true);
-    } catch {
-      setMissing(true);
+      else {
+        // Maybe the wrong account: forget it, so trying again asks which one to use.
+        await signOutOfGoogle();
+        setProblem(
+          googleSignInAvailable
+            ? `No MiniGo backup found in that ${cloudProvider.name}. Try again to pick another Google account, or use your recovery phrase.`
+            : `No MiniGo backup found in ${cloudProvider.name}. Check you're signed in to the same account, or use your recovery phrase.`,
+        );
+      }
+    } catch (caught) {
+      setProblem(caught instanceof CloudSignInError ? caught.message : `Couldn't reach ${cloudProvider.name}. Check your connection and try again.`);
     } finally {
       setChecking(false);
     }
@@ -64,9 +73,9 @@ export default function RestoreScreen() {
           {option(Cloud, `From ${cloudProvider.name}`, "Use your backup password", fromCloud, checking)}
           {option(KeyRound, "With your recovery phrase", "Type the 12 or 24 words you wrote down", () => router.push("/onboarding/restore-phrase"))}
         </View>
-        {missing && (
+        {problem && (
           <Notice icon={Cloud} tone="warning">
-            No MiniGo backup found in {cloudProvider.name}. Check you&apos;re signed in to the same account, or use your recovery phrase.
+            {problem}
           </Notice>
         )}
       </View>

@@ -11,6 +11,5 @@ function devHost() {
   return "localhost";
 }
 
-// Where `npm start` in test-mini-app/ serves the test mini app. Override with EXPO_PUBLIC_TEST_MINI_APP_URL,
-// e.g. to point at a deployed copy.
+// examples/mini-app in the SDK. EXPO_PUBLIC_TEST_MINI_APP_URL points it somewhere else.
 export const testMiniAppUrl = process.env.EXPO_PUBLIC_TEST_MINI_APP_URL || `http://${devHost()}:${TEST_MINI_APP_PORT}`;

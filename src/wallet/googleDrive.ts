@@ -1,22 +1,28 @@
 import { isBackupFile, type BackupFile } from "@/wallet/backup";
-import { BACKUP_FILE_NAME, type CloudAdapter } from "@/wallet/cloud";
+import type { CloudAdapter } from "@/wallet/cloud";
 
-// Google Drive adapter for Android. Files go to the app-private `appDataFolder`, which the user can't
-// browse and other apps can't read. `getAccessToken` must return an OAuth token with the
-// `https://www.googleapis.com/auth/drive.appdata` scope, e.g. from @react-native-google-signin
-// (needs a development build and an OAuth client). Wire it up with:
-//   setCloudAdapter(googleDriveAdapter(() => GoogleSignin.getTokens().then((t) => t.accessToken)))
-// Not yet exercised against the live API.
+// Saves to the hidden appDataFolder. `getAccessToken` needs the drive.appdata scope (see googleAuth.ts).
+// Not tried against the live API yet.
 
 const API = "https://www.googleapis.com/drive/v3/files";
 const UPLOAD = "https://www.googleapis.com/upload/drive/v3/files";
+export const BACKUP_FILE_NAME = "minigo-wallet-backup.json";
 
-export function googleDriveAdapter(getAccessToken: () => Promise<string>): CloudAdapter {
+export function googleDriveAdapter(getAccessToken: () => Promise<string>, forgetToken?: (token: string) => Promise<void>): CloudAdapter {
   const request = async (url: string, init: RequestInit = {}) => {
-    const token = await getAccessToken();
-    const response = await fetch(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } });
-    if (!response.ok) throw new Error(`Google Drive request failed (${response.status})`);
-    return response;
+    const send = async () => {
+      const token = await getAccessToken();
+      const response = await fetch(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } });
+      return { token, response };
+    };
+    let attempt = await send();
+    // A cached token can expire; drop it and try once more with a fresh one.
+    if (attempt.response.status === 401 && forgetToken) {
+      await forgetToken(attempt.token);
+      attempt = await send();
+    }
+    if (!attempt.response.ok) throw new Error(`Google Drive request failed (${attempt.response.status})`);
+    return attempt.response;
   };
 
   const findFileId = async () => {

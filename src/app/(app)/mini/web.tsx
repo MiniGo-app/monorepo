@@ -9,9 +9,8 @@ import { useLaunchMiniApp } from "@/mini/OpenApps";
 import { originOf } from "@/mini/types";
 import { useTheme } from "@/theme/ThemeProvider";
 
-// minigo://mini/web?url=…: opens any http(s) URL as a mini app in the open-apps layer, then steps back.
-// Development builds only. Every route is also a deep link, so in a release build this would let any link open any
-// site inside the wallet, under any name it chose, looking like a vetted mini app.
+// Opens any http(s) URL as a mini app. Development builds only: every route is also a deep link, so in a release
+// build any link could open any site in the wallet under a name of its choosing.
 export default function WebMiniAppScreen() {
   const { url, name } = useLocalSearchParams<{ url: string; name?: string }>();
   const { colors } = useTheme();

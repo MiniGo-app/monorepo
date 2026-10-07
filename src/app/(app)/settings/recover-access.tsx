@@ -11,8 +11,8 @@ import { isPhraseWord, isValidPhrase, normalizePhrase } from "@/wallet/stellar";
 import { useWallet } from "@/wallet/WalletProvider";
 import { useSecretScreen } from "@/wallet/useSecretScreen";
 
-// After the phone's biometrics or lock screen change, the OS stops opening the key MiniGo stored. The wallet
-// itself is fine: entering the recovery phrase again stores it under the phone's current security.
+// After the phone's biometrics or lock screen change the OS won't open the stored key. Entering the phrase
+// again stores it under the current settings.
 export default function RecoverAccessScreen() {
   useSecretScreen();
   const { colors } = useTheme();

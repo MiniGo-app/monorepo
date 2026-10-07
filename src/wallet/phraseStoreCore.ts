@@ -1,18 +1,9 @@
-// Where the recovery phrase lives, and what it takes to read it. Pure logic over a backend so it can be tested
-// without a phone (see test/phraseStore.test.ts); the real backend is phraseBackend.ts.
+// Where the recovery phrase is stored and what it takes to read it. Kept free of native imports so it can be
+// tested in Node; the real backend is phraseBackend.ts.
 //
-// Two tiers:
-//   "device"   The phrase is in an item the OS will only release after the user authenticates with biometrics
-//              (iOS Keychain access control biometryCurrentSet; Android Keystore AES key with
-//              setUserAuthenticationRequired(true), checked per use through a BiometricPrompt CryptoObject; both are
-//              biometrics only, no passcode fallback). A JavaScript-level bypass of the PIN screen does not help:
-//              the read itself is what triggers the system prompt, and the OS enforces it.
-//   "pin-only" The phrase is in a plain Keychain/Keystore item (encrypted at rest, this device only). The only
-//              gate is MiniGo's own PIN check, which is JavaScript. Used when the device can't do the above:
-//              no biometrics enrolled, Expo Go, or web preview.
-//
-// Both keep the OS's protection at rest and are excluded from device backups. The difference is what stops code
-// running inside the app from reading the phrase.
+// "device": an item the OS only releases after biometrics, so a bypass of the PIN screen in JavaScript doesn't help.
+// "pin-only": a plain Keychain or Keystore item, used where biometrics aren't available (Expo Go, web, none
+// enrolled). There the PIN check in JavaScript is the only gate.
 
 export const PHRASE_KEY = "minigo.phrase"; // the original slot: plain item
 export const DEVICE_PHRASE_KEY = "minigo.phrase.device"; // biometric-gated item
@@ -27,10 +18,8 @@ export type KeyValue = {
 };
 
 export type PhraseBackend = {
-  /** Can this runtime create biometric-gated items right now? False in Expo Go, on web, or with no biometrics enrolled. */
   deviceProtectionAvailable(): Promise<boolean>;
   plain: KeyValue;
-  /** Reading prompts the user; the OS enforces it. */
   device: KeyValue;
 };
 
@@ -39,10 +28,8 @@ export type ReadFailure =
   | "missing"
   // The user dismissed the prompt or was locked out of biometrics for now. Trying again is fine.
   | "cancelled"
-  // The OS no longer releases the key: biometrics were added/removed or the lock screen changed. The wallet's
-  // address is still known; signing needs the phrase to be entered again (recover()).
+  // Biometrics or the lock screen changed and the OS won't release the key. The phrase has to be entered again.
   | "invalidated"
-  // Any other error from the secure store. Nothing was changed.
   | "unavailable";
 
 export type PhraseRead = { ok: true; phrase: string; tier: Tier } | { ok: false; reason: ReadFailure };
@@ -60,7 +47,6 @@ export function createPhraseStore(backend: PhraseBackend) {
     return (await plain.get(PHRASE_KEY)) ? "pin-only" : "missing";
   }
 
-  /** Puts a phrase in the strongest place this device offers. Returns where it went. */
   async function store(phrase: string): Promise<Tier> {
     await clearAll();
     if (await backend.deviceProtectionAvailable()) {
@@ -69,7 +55,7 @@ export function createPhraseStore(backend: PhraseBackend) {
         await plain.set(TIER_KEY, "device");
         return "device";
       } catch {
-        // Fall through to the plain slot; never leave the user without a stored phrase.
+        // Never leave the user without a stored phrase.
         await device.remove(DEVICE_PHRASE_KEY).catch(() => {});
       }
     }
@@ -78,7 +64,7 @@ export function createPhraseStore(backend: PhraseBackend) {
     return "pin-only";
   }
 
-  /** Moves a phrase from the plain slot into the biometric-gated one, keeping the plain copy until the new one reads back. */
+  // Keeps the plain copy until the new one reads back.
   async function upgrade(phrase: string, prompt: string): Promise<PhraseRead> {
     try {
       await device.set(DEVICE_PHRASE_KEY, phrase);
@@ -95,7 +81,6 @@ export function createPhraseStore(backend: PhraseBackend) {
     }
   }
 
-  /** Reads the phrase. In the device tier this is where the user is asked to authenticate. */
   async function read(prompt: string): Promise<PhraseRead> {
     const current = await tier();
     if (current === "missing") return { ok: false, reason: "missing" };
@@ -112,7 +97,6 @@ export function createPhraseStore(backend: PhraseBackend) {
     return (await backend.deviceProtectionAvailable()) ? upgrade(phrase, prompt) : { ok: true, phrase, tier: "pin-only" };
   }
 
-  /** Removes everything, including an item the OS has invalidated. */
   async function clearAll() {
     await Promise.all([device.remove(DEVICE_PHRASE_KEY).catch(() => {}), plain.remove(PHRASE_KEY).catch(() => {}), plain.remove(TIER_KEY).catch(() => {})]);
   }
@@ -120,7 +104,6 @@ export function createPhraseStore(backend: PhraseBackend) {
   return { tier, store, read, clear: clearAll, canProtect: () => backend.deviceProtectionAvailable() };
 }
 
-export type PhraseStore = ReturnType<typeof createPhraseStore>;
 
 const keyAccessMessages: Record<ReadFailure, string> = {
   missing: "No wallet on this device",
@@ -129,7 +112,6 @@ const keyAccessMessages: Record<ReadFailure, string> = {
   unavailable: "MiniGo couldn't open your key. Try again.",
 };
 
-/** Thrown when the signing key can't be produced; `reason` says why so the UI can offer the right next step. */
 export class KeyAccessError extends Error {
   reason: ReadFailure;
   constructor(reason: ReadFailure) {

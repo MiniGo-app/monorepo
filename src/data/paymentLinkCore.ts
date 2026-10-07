@@ -1,9 +1,7 @@
-// SEP-0007 `web+stellar:pay` links, as far as MiniGo can honour them. Pure (no app imports) so it can be tested in
-// plain Node (test/paymentLink.test.ts). paymentLink.ts adds the address check.
+// SEP-0007 `web+stellar:pay` links. No app imports, so the tests can run it in Node.
 //
-// A payment code is someone telling the wallet what to send. Anything MiniGo can't send exactly as asked is refused
-// with a reason, never quietly changed: a USDC request must not become an XLM payment, and an exchange deposit
-// that needs a numeric memo must not go out with a text one (the exchange couldn't credit it).
+// Anything MiniGo can't send exactly as asked is refused with a reason rather than changed. A USDC request must not
+// become an XLM payment, and an exchange deposit with a numeric memo must not go out with a text one.
 
 export type PaymentFields = { destination: string; amount?: string; asset: string; memo?: string };
 export type PayLink = { ok: true; fields: PaymentFields } | { ok: false; reason: string };
@@ -26,7 +24,7 @@ function query(text: string): Record<string, string> | null {
   return params;
 }
 
-/** Null when `raw` isn't a pay link at all (it may still be a plain address). */
+// Null when `raw` isn't a pay link. It may still be a plain address.
 export function parsePayLink(raw: string): PayLink | null {
   const text = raw.trim();
   if (!text.toLowerCase().startsWith(PREFIX)) return null;
@@ -69,7 +67,7 @@ export function parsePayLink(raw: string): PayLink | null {
   return { ok: true, fields: { destination, amount, asset, memo } };
 }
 
-/** "0012.500" → "12.5". Plain decimal text for amounts, never "1e-7". Null if it isn't an amount. */
+// "0012.500" becomes "12.5". Never "1e-7".
 export function cleanAmount(text: string): string | null {
   const match = /^0*(\d*)(?:\.(\d*))?$/.exec(text.trim());
   if (!match || text.trim() === "" || text.trim() === ".") return null;
@@ -78,13 +76,10 @@ export function cleanAmount(text: string): string | null {
   return fraction ? `${whole}.${fraction}` : whole;
 }
 
-/** Whole stroops (0.0000001). Balances, reserves and fees are all whole stroops; anything finer is float noise. */
+// Balances, reserves and fees are whole stroops, anything finer is floating point noise.
 export const toStroops = (value: number) => Math.round(value * 1e7);
 
-/**
- * A balance as plain decimal text (for "Max"). Not Math.floor: 0.3 * 1e7 is 2999999.9999999995 in floating point,
- * and flooring that would offer 0.2999999.
- */
+// Not Math.floor: 0.3 * 1e7 is 2999999.9999999995, which would offer 0.2999999.
 export function floorAmount(value: number): string {
   const stroops = toStroops(value);
   if (!(stroops > 0)) return "0";

@@ -220,7 +220,7 @@ export default function AppsScreen() {
           title={browsing ? "All apps" : "Results"}
           action={
             <Text size={12.5} color={colors.muted}>
-              {browsing ? "A–Z" : `${results.length} ${results.length === 1 ? "app" : "apps"}`}
+              {browsing ? "A to Z" : `${results.length} ${results.length === 1 ? "app" : "apps"}`}
             </Text>
           }
         />

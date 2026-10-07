@@ -9,7 +9,7 @@ import { getMiniApp } from "@/data/miniApps";
 import { useLaunchMiniApp } from "@/mini/OpenApps";
 import { useTheme } from "@/theme/ThemeProvider";
 
-// minigo://mini/<id>: opens the app in the open-apps layer and steps back to where the user was.
+// Deep link to a catalogue app. Opens it and steps back.
 export default function CatalogMiniAppScreen() {
   const { appId } = useLocalSearchParams<{ appId: string }>();
   const { colors } = useTheme();

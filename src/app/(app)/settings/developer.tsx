@@ -12,7 +12,7 @@ import { TEST_MINI_APP_PORT, testMiniAppUrl } from "@/data/devApps";
 import { useLaunchMiniApp } from "@/mini/OpenApps";
 import { originOf } from "@/mini/types";
 
-// Development builds only: the route is also a deep link, and it opens any URL as a mini app.
+// Development builds only, since the route is also a deep link.
 export default function DeveloperRoute() {
   return __DEV__ ? <DeveloperScreen /> : <Redirect href="/profile" />;
 }
@@ -53,8 +53,8 @@ function DeveloperScreen() {
 
       <View style={styles.note}>
         <Notice icon={Info}>
-          Start it with `npm start` in test-mini-app/ (port {TEST_MINI_APP_PORT}). On a phone, the URL uses your computer&apos;s
-          network address so the phone can reach it; both must be on the same Wi-Fi.
+          Start it with `npm start` in the SDK&apos;s examples/mini-app (port {TEST_MINI_APP_PORT}). On a phone the URL uses your
+          computer&apos;s network address, so both need to be on the same Wi-Fi.
         </Notice>
       </View>
     </StackScreen>

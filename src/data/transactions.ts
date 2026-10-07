@@ -9,7 +9,7 @@ export type Transaction = {
   kind: TxKind;
   asset: { code: string; issuer?: string };
   amount: number;
-  /** Network fee in XLM, when this wallet paid it. */
+  // In XLM, when this wallet paid it.
   fee: number;
   counterparty: Counterparty;
   date: string;

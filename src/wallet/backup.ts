@@ -7,8 +7,7 @@ import { KDF, MIN_PASSWORD_LENGTH, hasSafeKdfParams, passwordStrength } from "@/
 export { KDF, MIN_PASSWORD_LENGTH, hasSafeKdfParams, passwordStrength };
 export type { PasswordScore, PasswordStrength } from "@/wallet/backupPolicy";
 
-// The recovery phrase never leaves the phone in the clear: it is sealed with AES-256-GCM under a key
-// stretched from the user's backup password with scrypt. Only the sealed file goes to the cloud.
+// The phrase is sealed with AES-256-GCM under a key stretched from the backup password with scrypt.
 
 export type BackupFile = {
   app: "minigo";
@@ -24,8 +23,7 @@ export type BackupFile = {
 const associatedData = (file: Pick<BackupFile, "version" | "address">) =>
   utf8(`minigo-backup-v${file.version}:${file.address}`);
 
-// 0–1, while the password is stretched. scrypt is deliberately slow (the file sits in the cloud, so it
-// must resist offline guessing) and runs in JS, so the UI shows progress.
+// From 0 to 1. scrypt in JS is slow on purpose, so the UI shows progress.
 export type Progress = (fraction: number) => void;
 
 async function deriveKey(password: string, salt: Uint8Array, params: { N: number; r: number; p: number }, onProgress?: Progress) {

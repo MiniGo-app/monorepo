@@ -2,12 +2,10 @@ import { StyleSheet, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useTheme } from "@/theme/ThemeProvider";
 
-// The MiniGo mark: a ring, a dot and a smile-shaped arc. It is drawn in one colour, so it works on any
-// background: pass the colour that reads on it, or use LogoTile, which flips with the theme.
-// Geometry comes from the original artwork (assets/brand/); the viewBox is a tight box around the mark.
+// A ring, a dot and a smile in one colour, so it works on any background. Geometry is from assets/brand.
 const VIEW = { x: 456.66, y: 283.99, w: 613.31, h: 956.73 };
 
-type LogoProps = { /** Height in points; the width follows. */ size?: number; color?: string };
+type LogoProps = { size?: number; color?: string };
 
 export function Logo({ size = 32, color }: LogoProps) {
   const { colors } = useTheme();
@@ -27,7 +25,7 @@ export function Logo({ size = 32, color }: LogoProps) {
   );
 }
 
-/** The mark on a rounded tile: black tile with a white mark in light mode, the reverse in dark mode. */
+// Black tile in light mode, white tile in dark mode.
 export function LogoTile({ size = 36 }: { size?: number }) {
   const { colors } = useTheme();
   return (

@@ -36,10 +36,8 @@ const methodOf = (raw: unknown) => {
 
 type Approval = { request: ApprovalRequest; resolve: (approved: boolean) => void };
 
-// Runs a mini app and answers its wallet requests with the SDK's host (the same code the browser extension
-// uses): permission per app, validation, the user's approval, signing and submitting to the network.
-// It stays mounted while minimized or while another app is on screen (see OpenApps.tsx); `active` says whether it
-// is the one on screen. Approval sheets only ever show for the app on screen.
+// Answers a mini app's wallet requests with the SDK's host. It stays mounted while the app is minimized, and
+// approval sheets only show while it is `active`.
 export function MiniAppHost({ app, active }: { app: HostedApp; active: boolean }) {
   const { colors } = useTheme();
   const toast = useToast();
@@ -52,10 +50,9 @@ export function MiniAppHost({ app, active }: { app: HostedApp; active: boolean }
   const [frameKey, setFrameKey] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [approval, setApproval] = useState<Approval | null>(null);
-  // Requests that are being checked, signed or sent (so the wallet can say it's busy instead of looking idle).
+  // So the wallet looks busy instead of idle while a request is signed or sent.
   const [working, setWorking] = useState(0);
   const queue = useRef<Approval[]>([]);
-  // Requests already in flight read the live connection state, not the one from when they arrived.
   const connectedRef = useRef(connected);
   const activeRef = useRef(active);
 
@@ -72,12 +69,11 @@ export function MiniAppHost({ app, active }: { app: HostedApp; active: boolean }
     const pending = queue.current;
     return () => {
       clearTimeout(timer);
-      // Closing the app declines whatever it was still asking for.
       pending.splice(0).forEach((item) => item.resolve(false));
     };
   }, []);
 
-  // One approval on screen at a time; the rest wait their turn.
+  // One approval at a time.
   const decide = (approved: boolean) => {
     const current = queue.current.shift();
     current?.resolve(approved);
@@ -88,8 +84,7 @@ export function MiniAppHost({ app, active }: { app: HostedApp; active: boolean }
   const context: HostContext = {
     network: NETWORK,
     address: async () => address,
-    // The user has approved by now; with device protection the system asks for biometrics here. A refusal or a
-    // key the phone no longer opens becomes an answer the mini app (and the toast below) can act on.
+    // A biometrics refusal or an invalidated key becomes an answer the mini app can act on.
     keypair: async () => {
       try {
         return await getKeypair(`Approve for ${app.name}`);
@@ -107,12 +102,11 @@ export function MiniAppHost({ app, active }: { app: HostedApp; active: boolean }
     },
     approve: (request) =>
       new Promise<boolean>((resolve) => {
-        // A second connect prompt that queued up behind an approved one has nothing left to ask.
+        // A connect queued behind one that was approved has nothing left to ask.
         if (request.kind === "connect" && connectedRef.current) return resolve(true);
         queue.current.push({ request, resolve });
         if (queue.current.length === 1) setApproval(queue.current[0]);
         setWaiting(app.id, queue.current.length);
-        // An app in the background can ask, but it waits until the user switches to it.
         if (!activeRef.current && queue.current.length === 1) toast(`${app.name} is waiting for your approval`);
       }),
     onPayment: ({ hash, amount, assetCode }) => {
@@ -122,17 +116,15 @@ export function MiniAppHost({ app, active }: { app: HostedApp; active: boolean }
     },
   };
 
-  // Catalogue apps are known by id; URL apps by their origin, which the frame has already checked.
+  // URL apps go by their origin, which the frame has already checked.
   const onRequest = async (raw: unknown) => {
     const method = methodOf(raw);
     const slow = method !== undefined && SLOW_METHODS.includes(method);
     if (slow) setWorking((count) => count + 1);
     try {
       const response = await handleRequest(context, app.origin ?? `app:${app.id}`, raw);
-      // The mini app hears every outcome, but only a decline is silent here: anything else the user should see
-      // in the wallet too, since the page may not say.
-      // A site that floods requests is refused quietly: it already has prompts waiting, and toasting each refusal
-      // would let it spam the wallet's UI instead.
+      // Show errors in the wallet as the page may not, except declines and the refusals for a site flooding
+      // requests, which would let it spam the UI.
       if (slow && response?.error && response.error.code !== -4 && response.error.ext?.[0] !== TOO_MANY_PENDING) {
         toast(response.error.ext?.[0] && response.error.code === -3 ? response.error.ext[0] : response.error.message);
       }

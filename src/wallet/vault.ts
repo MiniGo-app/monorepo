@@ -1,7 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-// Device-only secrets (recovery phrase, PIN hash) live in the Keychain / Keystore and are never
-// migrated to another device by OS backups; the encrypted cloud backup is the way to move a wallet.
+// Kept in the Keychain or Keystore on this device only. The encrypted cloud backup is how a wallet moves.
 const options: SecureStore.SecureStoreOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
 };

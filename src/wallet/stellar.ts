@@ -4,9 +4,8 @@ import { sha512 } from "@noble/hashes/sha2.js";
 import { entropyToMnemonic, mnemonicToSeed, validateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 
-// Stellar keys from a BIP-39 recovery phrase, following SEP-0005: SLIP-0010 ed25519 derivation along
-// m/44'/148'/account'. Pure functions (randomness is passed in) so they can be checked against the
-// SEP-0005 test vectors.
+// SEP-0005 keys from a BIP-39 phrase (SLIP-0010 ed25519 along m/44'/148'/account'). Randomness is passed in so
+// the SEP-0005 test vectors can be checked.
 
 const HARDENED = 0x80000000;
 const ACCOUNT_ID_VERSION = 6 << 3; // "G…"
@@ -14,7 +13,7 @@ const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 export type StellarAccount = { publicKey: string; secretSeed: Uint8Array };
 
-// 16 bytes of entropy → 12 words.
+// 16 bytes of entropy make 12 words.
 export function phraseFromEntropy(entropy: Uint8Array) {
   return entropyToMnemonic(entropy, wordlist);
 }

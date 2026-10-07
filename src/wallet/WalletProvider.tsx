@@ -42,12 +42,11 @@ type WalletData = {
   backup: BackupInfo | null;
   settings: Settings;
   connectedApps: ConnectedApp[];
-  /** Transaction hash → the mini app that asked for it, so history can say so. */
+  // Which mini app asked for each payment, by transaction hash.
   appNotes: { [hash: string]: AppNote };
   readNotifications: string[];
 };
 
-/** Live state of the account on the Stellar network. */
 export type Chain = {
   status: "loading" | "ready" | "error";
   account: AccountState | null;
@@ -66,8 +65,7 @@ const DATA_KEY = "minigo-wallet";
 const ATTEMPTS_KEY = "minigo-pin-attempts";
 const PIN_KEY = "minigo.pin";
 const MAX_ATTEMPTS = 5;
-// In the device-protected tier the derived key is kept this long after the user authenticated, so a burst of
-// signatures (a mini app making several requests) isn't a prompt each. It is dropped on lock and backgrounding.
+// With device protection the key is kept briefly so a mini app's burst of requests isn't a prompt each.
 const DEVICE_KEY_TTL_MS = 60_000;
 const POLL_MS = 15_000;
 const autoLockMs: Record<AutoLock, number> = { immediately: 0, "1m": 60_000, "5m": 300_000 };
@@ -94,13 +92,10 @@ type WalletValue = {
   lock: () => void;
   verifyPin: (pin: string) => Promise<boolean>;
   changePin: (current: string, next: string) => Promise<boolean>;
-  /** PIN, then the device's own authentication where the phrase is device-protected. Null if either is refused. */
   revealPhrase: (pin: string) => Promise<string | null>;
-  /** How the recovery phrase is protected on this device (see SECURITY_REVIEW.md). */
   keyProtection: Tier | "unknown";
-  /** True when the OS stopped releasing the key (biometrics or lock screen changed). Signing needs recoverAccess(). */
+  // The OS stopped releasing the key and the phrase has to be entered again.
   needsKeyRecovery: boolean;
-  /** Enter the recovery phrase again to re-secure the key. Resolves false if it isn't this wallet's phrase. */
   recoverAccess: (phrase: string) => Promise<boolean>;
   updateProfile: (profile: Profile) => void;
   updateSettings: (settings: Partial<Settings>) => void;
@@ -109,13 +104,9 @@ type WalletValue = {
   disconnectApp: (id: string) => void;
   markNotificationsRead: (ids: string[]) => void;
   signOut: () => Promise<void>;
-  // Network
-  /** Reloads balances, and history if anything changed. `force` reloads history regardless (pull to refresh). */
+  // `force` reloads history even if the account hasn't changed.
   refresh: (force?: boolean) => Promise<void>;
-  /**
-   * The signing key. Call only after the user approved the action: with device protection this is where the
-   * system asks for biometrics. Throws KeyAccessError.
-   */
+  // Only call this after the user approved. With device protection this is where biometrics are asked for.
   getKeypair: (reason?: string) => Promise<Keypair>;
   fundTestnet: () => Promise<void>;
   changeTrust: (asset: Asset, remove?: boolean) => Promise<string>;
@@ -130,7 +121,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<WalletData | null>(null);
   const [chain, setChain] = useState<Chain>({ status: "loading", account: null, history: [] });
   const [attempts, setAttempts] = useState<Attempts>({ count: 0, until: 0 });
-  // The latest count, for PIN checks that overlap (the state value in a callback can be a render behind).
+  // The state value in a callback can be a render behind.
   const attemptsRef = useRef(attempts);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const backgroundedAt = useRef<number | null>(null);
@@ -139,8 +130,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const keypairLoading = useRef<Promise<Keypair> | null>(null);
   const [keyProtection, setKeyProtection] = useState<Tier | "unknown">("unknown");
   const [needsKeyRecovery, setNeedsKeyRecovery] = useState(false);
-  // System authentication prompts (Face ID, fingerprint) make the app "inactive" for a moment. That isn't the user
-  // leaving, so it must not start the auto-lock clock or drop the key mid-operation.
+  // Face ID and fingerprint prompts make the app inactive for a moment. That shouldn't start the auto-lock.
   const promptDepth = useRef(0);
   const promptEndedAt = useRef(0);
   const duringPrompt = useCallback(<T,>(run: () => Promise<T>) => {
@@ -184,7 +174,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Persist everything except secrets whenever it changes.
+  // Everything except secrets.
   useEffect(() => {
     if (data) AsyncStorage.setItem(DATA_KEY, JSON.stringify(data)).catch(() => {});
   }, [data]);
@@ -200,7 +190,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setStatus((current) => (current === "unlocked" ? "locked" : current));
   }, [dropKeypair]);
 
-  // Auto-lock after the app has been in the background longer than the chosen delay.
   const autoLock = data?.settings.autoLock ?? "1m";
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (next) => {
@@ -217,10 +206,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return () => subscription.remove();
   }, [autoLock, lockNow, dropKeypair]);
 
-  // ---- Network state
-  // Polled every 15 s. The account is one small request; history (50 payments joined with their transactions) is
-  // much heavier, so it is fetched again only when the account has changed since, or when asked (`force`, e.g.
-  // pull to refresh). Nothing changed means no new state, so the screens don't re-render either.
+  // History is the heavy request, so it's only fetched again when the account changed or on pull to refresh.
   const chainRef = useRef(chain);
   useEffect(() => {
     chainRef.current = chain;
@@ -264,13 +250,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem(ATTEMPTS_KEY, JSON.stringify(next)).catch(() => {});
   }, []);
 
-  // Wrong PINs: after five, each further miss locks input for longer (30s, 1m, 2m, …).
+  // After five wrong PINs each miss locks input for longer: 30s, 1m, 2m and so on.
   const verifyPin = useCallback(
     async (pin: string) => {
       const current = attemptsRef.current;
       if (Date.now() < current.until) return false;
-      // The attempt is counted, and the count saved, before the PIN is checked. Counting only after a wrong answer
-      // would let someone force-close the app mid-check and keep guessing without ever reaching the lockout.
+      // Count and save the attempt first, so force-closing the app mid-check can't skip the lockout.
       const count = current.count + 1;
       await saveAttempts({ count, until: count >= MAX_ATTEMPTS ? Date.now() + 30_000 * 2 ** (count - MAX_ATTEMPTS) : 0 });
       const stored = await vault.get(PIN_KEY);
@@ -328,10 +313,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [verifyPin],
   );
 
-  // Reading the phrase: with device protection the OS asks for biometrics as part of the read. Without it (Expo Go,
-  // no biometrics enrolled) the only gate is MiniGo's own PIN check, which is JavaScript, so where the device has a
-  // lock screen we also ask for it as defence in depth. That extra prompt is a boolean the app trusts, not a key
-  // the OS withholds; see SECURITY_REVIEW.md.
+  // With device protection the OS asks for biometrics as part of the read. Without it the PIN check is the only
+  // gate, so the device lock screen is asked for as well where there is one.
   const readPhrase = useCallback(
     async (reason: string) => {
       const read = await duringPrompt(() => phraseStore.read(reason));
@@ -365,14 +348,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const getKeypair = useCallback(
     async (reason = "Approve with your device") => {
       if (keypairRef.current) return keypairRef.current;
-      // A second request that arrives while the first is waiting on the prompt shares its answer.
       keypairLoading.current ??= (async () => {
         const { phrase, tier } = await readPhrase(reason);
         const { secretSeed, publicKey } = await deriveAccount(phrase);
         const keypair = Keypair.fromRawEd25519Seed(secretSeed as never);
         if (keypair.publicKey() !== publicKey || publicKey !== dataRef.current?.address) throw new Error("Key doesn't match this wallet");
         keypairRef.current = keypair;
-        // Device tier: keep it briefly. PIN-only: until lock, as it was before (nothing the OS enforces to re-ask).
+        // The device tier keeps it briefly. PIN-only keeps it until lock.
         if (tier === "device") keypairTimer.current = setTimeout(dropKeypair, DEVICE_KEY_TTL_MS);
         return keypair;
       })().finally(() => {
@@ -383,19 +365,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [readPhrase, dropKeypair],
   );
 
-  // Deriving the key from the phrase takes a moment on a phone. Where reading the phrase needs no prompt (PIN-only),
-  // do it right after unlocking so the first payment doesn't wait on it. With device protection nothing is read
-  // until the user approves something, so there is no prompt at unlock and no key sitting in memory.
+  // With PIN-only protection reading the phrase needs no prompt, so derive the key at unlock and the first payment
+  // doesn't wait for it.
   useEffect(() => {
     if (status !== "unlocked" || keyProtection !== "pin-only") return;
-    // A wallet that could be upgraded is upgraded on its first approved action, not here, so unlocking never prompts.
+    // A wallet that can be upgraded is upgraded on its first approved action, so unlocking never prompts.
     phraseStore
       .canProtect()
       .then((canProtect) => (canProtect ? undefined : getKeypair()))
       .catch(() => {});
   }, [status, keyProtection, getKeypair]);
 
-  // Enter the phrase again after the OS invalidated the key (biometrics or lock screen changed).
   const recoverAccess = useCallback(
     async (input: string) => {
       if (!isValidPhrase(input)) return false;
@@ -461,12 +441,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     dropKeypair();
     setNeedsKeyRecovery(false);
     setKeyProtection("unknown");
-    // `data` stays in memory until the next wallet replaces it, so screens that are unmounting after the
-    // guard flips never see it missing. Nothing persists it again: it only changes through a wallet.
+    // `data` stays in memory so screens unmounting after the switch never see it missing.
     setStatus("onboarding");
   }, [dropKeypair]);
 
-  // Mini app payments are labelled here rather than when fetched, so a note that lands after a fetch shows.
+  // Labelled here rather than when fetched, so a note that lands after a fetch still shows.
   const appNotes = data?.appNotes;
   const labelledChain = useMemo(
     () => (appNotes ? { ...chain, history: labelAppPayments(chain.history, appNotes) } : chain),
@@ -549,14 +528,12 @@ export function useWallet() {
   return value;
 }
 
-// For screens behind the unlocked guard, where wallet data always exists.
 export function useWalletData() {
   const { data } = useWallet();
   if (!data) throw new Error("Wallet data is only available while unlocked");
   return data;
 }
 
-/** Live balances and history for the unlocked wallet. */
 export function useChain() {
   return useWallet().chain;
 }

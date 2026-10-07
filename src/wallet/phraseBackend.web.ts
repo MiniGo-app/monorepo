@@ -1,7 +1,7 @@
 import type { PhraseBackend } from "./phraseStoreCore";
 import { vault } from "./vault";
 
-// Web preview only: no secure hardware, so the phrase is in localStorage. Never ship the wallet on web with this.
+// Web preview only. Never ship the wallet on web with this.
 const unsupported = async (): Promise<never> => {
   throw new Error("Device-protected storage is not available on web");
 };

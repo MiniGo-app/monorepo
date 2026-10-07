@@ -3,9 +3,8 @@ import { equalBytes, fromBase64, toBase64, utf8 } from "./bytes";
 
 export const PIN_LENGTH = 6;
 
-// A salted SHA-256 is enough here: a 6-digit PIN can't be made hard to brute-force by hashing alone.
-// What protects it is where the hash lives (the Keychain / Keystore, next to the recovery phrase
-// itself) and the attempt lockout in WalletProvider.
+// Hashing can't make a 6-digit PIN hard to brute-force. What protects it is that the hash is in the Keychain or
+// Keystore, and the lockout in WalletProvider.
 async function hash(pin: string, salt: Uint8Array) {
   const data = new Uint8Array(salt.length + PIN_LENGTH);
   data.set(salt);
@@ -24,7 +23,6 @@ export async function checkPin(pin: string, stored: string) {
   return equalBytes(await hash(pin, fromBase64(salt)), fromBase64(expected));
 }
 
-// Obvious PINs are refused when setting one.
 export function isWeakPin(pin: string) {
   if (/^(\d)\1+$/.test(pin)) return true;
   const digits = pin.split("").map(Number);

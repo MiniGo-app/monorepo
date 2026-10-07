@@ -128,7 +128,7 @@ export default function HomeScreen() {
               )}
             </Pressable>
             <Text weight="medium" size={42} tracking={-0.035} color="#FFFFFF" style={styles.amount} adjustsFontSizeToFit numberOfLines={1}>
-              {hidden ? "••••••" : totalPending ? "—" : `$${dollars}`}
+              {hidden ? "••••••" : totalPending ? "..." : `$${dollars}`}
               {!hidden && !totalPending && (
                 <Text weight="medium" size={42} tracking={-0.035} color="rgba(255,255,255,0.45)">
                   .{cents}

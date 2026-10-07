@@ -23,14 +23,14 @@ export type MiniApp = {
   developer: string;
   // Shown when there is no image or logo.
   icon: LucideIcon;
-  // Partner artwork with padding around its own squircle; scaled up to crop it.
+  // Partner artwork with padding around its own squircle, scaled up to crop it.
   image?: ImageSourcePropType;
-  // The site's own icon, saved from it and already sized to fill the frame.
+  // The site's own icon, already sized to fill the frame.
   logo?: ImageSourcePropType;
-  // Live site to load. Without one the app runs a bundled demo page.
+  // Without one the app runs a bundled demo page.
   url?: string;
-  // For sites that switch to a WalletConnect-only connect flow on phones (judged by user agent and touch), which
-  // MiniGo can't answer: present a desktop browser so the site uses the injected Freighter instead.
+  // Some sites switch to a WalletConnect-only flow on phones, which MiniGo can't answer. Looking like a desktop
+  // browser makes them use the injected Freighter instead.
   desktopMode?: boolean;
 };
 

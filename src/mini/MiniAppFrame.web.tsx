@@ -3,9 +3,8 @@ import { acceptWebFrameMessage } from "@minigo/wallet-sdk/bridge-gate.ts";
 import { inpageProvider } from "./inpage.generated";
 import type { MiniAppFrameProps } from "./MiniAppFrame.types";
 
-// On web a mini app runs in an iframe. Bundled pages get the SDK provider prepended and run sandboxed with
-// an opaque origin; URL apps are cross-origin, so they include the same provider themselves (see
-// test-mini-app/public/minigo.js) and messages must come from their origin.
+// On web a mini app runs in an iframe. Bundled pages get the provider prepended and run sandboxed. URL apps
+// include examples/mini-app/public/minigo.js from the SDK themselves and must post from their own origin.
 export function MiniAppFrame({ app, backgroundColor, onRequest }: MiniAppFrameProps) {
   const frame = useRef<HTMLIFrameElement>(null);
   const handleRequest = useEffectEvent(onRequest);
@@ -14,7 +13,6 @@ export function MiniAppFrame({ app, backgroundColor, onRequest }: MiniAppFramePr
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const target = frame.current?.contentWindow;
-      // event.source is the window that really sent it, so a frame nested in the app's frame is rejected.
       if (!target || !acceptWebFrameMessage(event, target, origin)) return;
       handleRequest(event.data).then((response) => {
         if (response) target.postMessage(JSON.stringify(response), origin ?? "*");

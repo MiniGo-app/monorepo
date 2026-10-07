@@ -32,8 +32,7 @@ const titles: Record<SignApproval["kind"], string> = {
   signMessage: "wants you to sign a message",
 };
 
-// A mini app asking for a signature: what it would sign, then the PIN. Signing doesn't send anything by
-// itself; the app submits what it gets back.
+// Signing sends nothing by itself. The mini app submits what it gets back.
 export function SignSheet({ app, request, onDecline, onApprove }: SignSheetProps) {
   const { colors } = useTheme();
   const { verifyPin } = useWallet();

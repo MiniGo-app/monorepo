@@ -1,7 +1,6 @@
-// Which mini apps are open, in most-recently-used order, and which one is on screen. Pure so it can be tested
-// without React Native (test/openApps.test.ts); OpenApps.tsx holds it in state and renders a host per app.
+// Which mini apps are open, most recent first. No React here so the tests can run it in Node.
 
-// Each open app is a live WebView. Three keeps switching instant without holding too much memory on low-end phones.
+// Each open app is a live WebView, so this is about memory on low-end phones.
 export const MAX_OPEN_APPS = 3;
 
 export type OpenApp = { id: string };
@@ -9,10 +8,7 @@ export type OpenAppsState<A extends OpenApp> = { apps: A[]; activeId: string | n
 
 const toFront = <A extends OpenApp>(apps: A[], app: A) => [app, ...apps.filter((item) => item.id !== app.id)];
 
-/**
- * Opens `app`, or brings it back if it is already open (keeping the running instance, so its state survives).
- * Past the limit, the least recently used app is closed, preferring one that isn't waiting on the user.
- */
+// Past the limit the least recently used app closes, preferring one that isn't waiting on the user.
 export function launch<A extends OpenApp>(state: OpenAppsState<A>, app: A, waiting: (id: string) => boolean = () => false): { state: OpenAppsState<A>; closed: A | null } {
   const existing = state.apps.find((item) => item.id === app.id);
   let apps = toFront(state.apps, existing ?? app);

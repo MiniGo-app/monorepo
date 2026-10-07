@@ -1,4 +1,4 @@
-// Must stay first: installs the Buffer that Stellar's libraries need before any of them load (see src/polyfills.ts).
+// Must stay first.
 import "@/polyfills";
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold, useFonts } from "@expo-google-fonts/geist";
 import { Stack } from "expo-router";
@@ -29,8 +29,7 @@ export default function RootLayout() {
   );
 }
 
-// Onboarding, the lock screen and the app are mutually exclusive: the wallet status decides which
-// group can be reached, and flipping it moves the user there.
+// The wallet status decides which of onboarding, the lock screen and the app can be reached.
 function RootStack() {
   const { mode, colors } = useTheme();
   const { status } = useWallet();

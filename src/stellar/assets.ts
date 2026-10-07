@@ -3,10 +3,10 @@ import { USDC_ISSUER } from "@minigo/wallet-sdk/core/assets.ts";
 import type { AccountState } from "@minigo/wallet-sdk/core/horizon.ts";
 import { NETWORK } from "./network";
 
-// What the app shows for each asset the account holds: XLM always, plus every trustline (USDC or any other).
+// XLM always, plus every trustline.
 
 export type WalletAsset = {
-  /** "XLM" or "CODE:ISSUER": stable id used in routes. */
+  // "XLM" or "CODE:ISSUER", used in routes.
   key: string;
   code: string;
   issuer?: string;
@@ -55,7 +55,7 @@ export function walletAssets(account: AccountState | null): WalletAsset[] {
 const number = (value: number, max = 7) =>
   value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: Math.max(2, max) });
 
-/** "1,250.50 XLM", "12.00 USDC": up to 7 decimals, trailing zeros past 2 trimmed. */
+// "1,250.50 XLM": up to 7 decimals, trailing zeros past 2 trimmed.
 export function formatAmount(code: string, amount: number) {
   return `${number(amount, 7)} ${code}`;
 }
@@ -64,7 +64,7 @@ export function formatUsd(amount: number) {
   return `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-/** USD value when we know a price: USDC at par, XLM from the market price. */
+// USDC at par, XLM at the market price.
 export function usdValue(asset: Pick<WalletAsset, "isNative" | "code" | "issuer" | "balance">, xlmPrice: number | null) {
   if (asset.isNative) return xlmPrice === null ? null : asset.balance * xlmPrice;
   if (asset.code === "USDC" && asset.issuer === USDC.getIssuer()) return asset.balance;

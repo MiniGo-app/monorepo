@@ -8,8 +8,7 @@ const logos = {
   usdc: require("../../assets/tokens/usdc.png"),
 };
 
-// XLM and Circle's USDC get their own logos; any other token shows its first letter. The USDC logo needs the
-// issuer to match, since anyone can issue a token called "USDC".
+// Anyone can issue a token called USDC, so the USDC logo also checks the issuer.
 export function AssetIcon({ code, issuer, isNative, size = 44 }: { code: string; issuer?: string; isNative?: boolean; size?: number }) {
   const { colors } = useTheme();
   const frame = { width: size, height: size, borderRadius: size / 2 };

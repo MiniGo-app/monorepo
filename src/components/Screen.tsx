@@ -6,8 +6,7 @@ import { useTheme } from "@/theme/ThemeProvider";
 import { Text } from "@/components/Text";
 import { TAB_BAR_SPACE } from "@/components/PillTabBar";
 
-// A tab's screen stays mounted when you switch away, so its scroll position would otherwise be waiting for you
-// when you return. Scroll back to the top as it loses focus, so it comes back looking new (and without a visible jump).
+// Tab screens stay mounted, so scroll back to the top when one loses focus and it comes back looking new.
 export function Screen({ children, ...props }: ScrollViewProps & { children: ReactNode }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
