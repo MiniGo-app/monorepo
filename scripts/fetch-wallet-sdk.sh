@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SDK_REPO="https://github.com/MiniGo-app/minigo-wallet-sdk.git"
-SDK_COMMIT="${MINIGO_WALLET_SDK_COMMIT:-PIN_AFTER_PUSH}"
+SDK_COMMIT="${MINIGO_WALLET_SDK_COMMIT:-57dda87d0d523f64f05465dde73fcedcd28a8e34}"
 SDK_DIR="$(cd "$(dirname "$0")/.." && pwd)/../minigo-wallet-sdk"
 
 if [ -d "$SDK_DIR/src" ]; then
