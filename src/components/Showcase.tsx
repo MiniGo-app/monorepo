@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type TransitionEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type TransitionEvent } from "react";
 import key from "../illustrations/key.svg?raw";
 import backup from "../illustrations/backup.svg?raw";
 import connect from "../illustrations/connect.svg?raw";
@@ -40,6 +40,36 @@ export function Showcase({ paused }: ShowcaseProps) {
   const [hovered, setHovered] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [reduced] = useState(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
+  // Every row of the strip is as tall as the tallest slide, so the window shows exactly one row. When the page is
+  // stacked, the drawing also shrinks to whatever height is left once the captions are in.
+  const sectionRef = useRef<HTMLElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [rowHeight, setRowHeight] = useState<number>();
+  const [fit, setFit] = useState<number>();
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const strip = stripRef.current;
+    if (!section || !strip) return;
+    const stacked = matchMedia("(max-width: 899px)");
+    const measure = () => {
+      const row = strip.offsetHeight / strip.children.length;
+      setRowHeight(row);
+      if (!stacked.matches) return setFit(undefined);
+      const drawing = strip.querySelector<HTMLElement>(".hl")?.offsetHeight ?? 0;
+      const captions = row - drawing;
+      setFit(Math.max(88, Math.floor((section.clientHeight - captions - 16) * 1.25)));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(strip);
+    observer.observe(section);
+    stacked.addEventListener("change", measure);
+    return () => {
+      observer.disconnect();
+      stacked.removeEventListener("change", measure);
+    };
+  }, []);
 
   useEffect(() => {
     const onVisibility = () => setHidden(document.hidden);
@@ -74,8 +104,9 @@ export function Showcase({ paused }: ShowcaseProps) {
 
   return (
     <section
+      ref={sectionRef}
       className="showcase rise"
-      style={{ "--d": ".5s" } as CSSProperties}
+      style={{ "--d": ".5s", "--fit": fit ? `${fit}px` : undefined } as CSSProperties}
       aria-roledescription="carousel"
       aria-label="What MiniGo does"
       onMouseEnter={() => setHovered(true)}
@@ -83,8 +114,9 @@ export function Showcase({ paused }: ShowcaseProps) {
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
     >
-      <div className="sc-window">
+      <div className="sc-window" style={{ height: rowHeight }}>
         <div
+          ref={stripRef}
           className="sc-strip"
           style={{
             transform: `translateY(${(-index * 100) / strip.length}%)`,
