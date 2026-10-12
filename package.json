@@ -1,0 +1,19 @@
+{
+  "name": "minigo-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "apps/landing",
+    "packages/wallet-sdk"
+  ],
+  "scripts": {
+    "dev:mobile": "npm run start -w minigo",
+    "dev:landing": "npm run dev -w minigo-landing",
+    "build:sdk": "npm run build -w minigo-wallet-sdk",
+    "build:landing": "npm run build -w minigo-landing",
+    "check": "npm run build:sdk && npm run typecheck -w minigo-wallet-sdk && npm run typecheck -w minigo && npm run lint -w minigo && npm run test:unit -w minigo-wallet-sdk && npm run test -w minigo && npm run build:landing"
+  },
+  "engines": {
+    "node": ">=22.6"
+  }
+}
