@@ -29,7 +29,7 @@ export function App() {
             On your Android phone, download the <strong>MiniGo app</strong> (an APK file).
           </li>
           <li>Open the file. If Android asks, allow your browser to install apps, then tap Install.</li>
-          <li>Open MiniGo and create a wallet. Save your recovery phrase somewhere safe.</li>
+          <li>Open MiniGo, create a wallet and set up your backup in the app.</li>
         </ol>
         <p className="dlg-note dlg-foot">An iPhone build is planned.</p>
         <div className="dlg-actions">
