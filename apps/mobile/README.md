@@ -4,20 +4,17 @@ A Stellar wallet for phones, built with Expo, with mini apps that run inside it.
 
 ## Setup
 
-The app imports the wallet SDK from source, so clone both repos side by side:
+The app imports the wallet SDK from `../../packages/wallet-sdk`. From the monorepo root:
 
 ```bash
-git clone https://github.com/MiniGo-app/minigo-app
-git clone https://github.com/MiniGo-app/minigo-wallet-sdk
-cd minigo-app
 npm install
-npx expo start          # scan the QR code with Expo Go
-npx expo start --web    # browser preview
+npm run build:sdk
+npm run dev:mobile
 ```
 
 Expo Go runs everything except Google Drive backup and the phone-protected recovery phrase, which need a development build (`eas build --profile development --platform android`).
 
-EAS builds this repo on its own, so `scripts/fetch-wallet-sdk.sh` (the `eas-build-pre-install` hook) clones the public SDK repo next to it at the commit pinned in that script. Bump the pin when the app needs a newer SDK.
+For a cloud APK build, check that EAS includes the monorepo's `packages/wallet-sdk` directory. The previous standalone-app hook that fetched a separate SDK repository is not used here.
 
 ## Checks
 
@@ -94,7 +91,7 @@ Open mini apps stay running in a layer above the screens (`src/mini/OpenApps.tsx
 Start the example mini app from the SDK:
 
 ```bash
-cd ../minigo-wallet-sdk/examples/mini-app && npm start
+cd ../../packages/wallet-sdk/examples/mini-app && npm start
 ```
 
 With the app running from `npx expo start`, open Mini apps > Developer > Test Mini App, or enter any URL under Profile > Developer. Both are hidden in production builds. The phone and the computer need to be on the same Wi-Fi.

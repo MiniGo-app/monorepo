@@ -54,8 +54,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --no-warnings --test test/*.test.ts",
-    "postinstall": "patch-package",
-    "eas-build-pre-install": "bash scripts/fetch-wallet-sdk.sh"
+    "postinstall": "patch-package"
   },
   "private": true
 }

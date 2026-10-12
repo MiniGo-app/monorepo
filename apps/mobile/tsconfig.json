@@ -7,10 +7,10 @@
         "./src/*"
       ],
       "@minigo/wallet-sdk/*": [
-        "../minigo-wallet-sdk/src/*"
+        "../../packages/wallet-sdk/src/*"
       ],
       "@stellar/stellar-base": [
-        "./node_modules/@stellar/stellar-base"
+        "../../node_modules/@stellar/stellar-base"
       ]
     },
     "allowImportingTsExtensions": true

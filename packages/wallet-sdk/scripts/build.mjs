@@ -1,6 +1,6 @@
 // Builds dist/extension (load it unpacked), dist/inpage.embedded.js (the provider MiniGo injects into mini apps)
 // and dist/kit (the Wallets Kit module). Then copies the provider into examples/mini-app and, when the app is
-// checked out next to this repo, into ../minigo.
+// included in the monorepo, into apps/mobile.
 import { build } from "esbuild";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -34,7 +34,7 @@ writeFileSync(
   join(root, "examples/mini-app/public/minigo.js"),
   `/* MiniGo in-page provider, built by minigo-wallet-sdk. Inside the MiniGo app it is injected already and this does nothing. */\n${embedded}\n`,
 );
-const app = join(root, "../minigo/src/mini");
+const app = join(root, "../../apps/mobile/src/mini");
 if (existsSync(app)) {
   writeFileSync(
     join(app, "inpage.generated.ts"),

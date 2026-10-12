@@ -2,12 +2,11 @@ const { getDefaultConfig } = require("expo/metro-config");
 const path = require("node:path");
 
 const projectRoot = __dirname;
-const sdkRoot = path.resolve(projectRoot, "../minigo-wallet-sdk/src");
+const sdkRoot = path.resolve(projectRoot, "../../packages/wallet-sdk/src");
 
 const config = getDefaultConfig(projectRoot);
 
-// The wallet SDK is checked out next to this app. Its imports resolve from this app's node_modules so there is
-// one copy of each package.
+// Resolve SDK source through the workspace so Metro uses one copy of each dependency.
 config.watchFolders = [sdkRoot];
 const defaultResolve = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
