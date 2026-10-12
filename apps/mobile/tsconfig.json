@@ -1,0 +1,18 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@minigo/wallet-sdk/*": [
+        "../minigo-wallet-sdk/src/*"
+      ],
+      "@stellar/stellar-base": [
+        "./node_modules/@stellar/stellar-base"
+      ]
+    },
+    "allowImportingTsExtensions": true
+  }
+}

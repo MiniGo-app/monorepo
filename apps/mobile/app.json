@@ -1,0 +1,77 @@
+{
+  "expo": {
+    "name": "MiniGo",
+    "slug": "minigo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "app.minigo.wallet",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#FFFFFF",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      "expo-font",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "MiniGo uses Face ID to unlock the key that signs your payments."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MiniGo uses the camera to scan payment QR codes.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "MiniGo uses Face ID to unlock your wallet and approve payments."
+        }
+      ]
+    ],
+    "scheme": "minigo",
+    "backgroundColor": "#FFFFFF",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "47db4f3f-057a-48d2-87d4-9c4fcd99957c"
+      }
+    },
+    "owner": "vademiju"
+  }
+}
