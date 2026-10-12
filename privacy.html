@@ -56,14 +56,14 @@
 <main>
   <p class="eyebrow">Legal</p>
   <h1>Privacy policy</h1>
-  <p class="dated">Last updated 6 October 2026</p>
+  <p class="dated">Last updated 7 October 2026</p>
 
   <div class="summary">
     <p><strong>The short version</strong></p>
     <ul>
       <li>MiniGo is a self-custodial wallet. Your recovery phrase and keys are made on your phone and stay there. We never see them.</li>
       <li>MiniGo has no servers that collect your data and no accounts with us. Your name, email and phone number stay on your phone.</li>
-      <li>Before your backup is saved anywhere, it's encrypted on your phone with a password only you know.</li>
+      <li>On Android your backup goes to a private folder in your own Google Drive, protected by your Google account. Nothing to remember.</li>
       <li>We don't use analytics, tracking or ads, and we don't sell data.</li>
       <li>Payments are recorded on the public Stellar network, which anyone can read.</li>
     </ul>
@@ -83,14 +83,14 @@
   </ul>
 
   <h2>Your backup</h2>
-  <p>When you back up your wallet, MiniGo encrypts your recovery phrase on your phone using a backup password you choose (scrypt and AES-256-GCM). The backup file holds only that encrypted phrase, your public wallet address and the settings needed to decrypt it. It holds no profile details.</p>
-  <p>The encrypted file is saved to your own cloud storage: a private app folder in your Google Drive on Android, or iCloud on iPhone. Until cloud sign-in is available in the app, the file stays on your phone.</p>
-  <p>We never see your backup password or your recovery phrase, so we can't reset the password or recover the backup for you.</p>
+  <p><strong>On Android</strong>, when you back up your wallet, MiniGo encrypts your recovery phrase on your phone and saves it, with your public wallet address, to a private app folder in your own Google Drive, after you sign in with your Google account. The file can only be opened by the MiniGo app. There's no backup password: signing in to the same Google account on a new phone restores your wallet. That means your Google account protects your wallet, and anyone who can sign in to it could restore it, so keep your Google account secure (a strong password and two-step verification). The backup holds no profile details.</p>
+  <p><strong>On iPhone</strong>, until iCloud backup is available, the encrypted file stays on your phone.</p>
+  <p>The backup goes straight between your phone and Google. We never see your recovery phrase, so we can't recover a backup for you.</p>
 
   <h3>Google user data</h3>
   <p>If you back up to Google Drive, MiniGo asks for one permission: <code>drive.appdata</code>. It lets MiniGo use a hidden folder in your Drive that only MiniGo can reach. MiniGo can't see or change any of your other Drive files.</p>
   <ul>
-    <li>MiniGo uses this access only to save, load and delete its own encrypted backup file, when you back up or restore.</li>
+    <li>MiniGo uses this access only to save, load and delete its own backup file, when you back up or restore.</li>
     <li>The file goes straight between your phone and Google. It doesn't pass through any MiniGo server, and no person at MiniGo reads it.</li>
     <li>We don't transfer, sell or use this data for advertising, or for any purpose other than your backup.</li>
   </ul>
@@ -102,7 +102,7 @@
     <li><strong>The Stellar network</strong> (servers run by the Stellar Development Foundation): your public wallet address to show your balance and history, and the transactions you sign. Everything on the Stellar network is public and permanent. Anyone can see an address's balance and payments, and no one can delete them.</li>
     <li><strong>CoinGecko:</strong> a request for the current XLM price, so MiniGo can show balances in dollars. It includes no information about you or your wallet.</li>
     <li><strong>Friendbot</strong> (Stellar's testnet faucet): your wallet address, only when you ask for test XLM.</li>
-    <li><strong>Google Drive or iCloud:</strong> your encrypted backup file, as described above.</li>
+    <li><strong>Google Drive or iCloud:</strong> your backup file, as described above.</li>
   </ul>
   <p>Some screens link to other websites, such as Stellar Expert for transaction details or Circle's faucet for test USDC. They open in your browser only when you tap them, under their own privacy policies.</p>
 
@@ -142,7 +142,7 @@
   <p>MiniGo isn't meant for children under 13, and we don't knowingly collect information from them.</p>
 
   <h2>Security</h2>
-  <p>We design MiniGo so your keys never leave your phone unencrypted. No system is perfectly secure, so keep your recovery phrase and backup password private and somewhere safe.</p>
+  <p>Your keys are only ever stored on your phone and in your own Google Drive backup. No system is perfectly secure, so keep your Google account secure and your recovery phrase private.</p>
 
   <h2>Changes to this policy</h2>
   <p>If we change this policy, we'll update the date at the top and, for important changes, tell you in the app or on this website.</p>

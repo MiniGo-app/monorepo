@@ -45,8 +45,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn:focus-visible, .link:focus-visible, .brand:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .btn-solid { background: #fff; color: var(--ink); }
 .btn-solid:hover { background: #e8e8e8; }
-.btn:disabled { opacity: 0.45; cursor: default; transform: none; }
-.btn-solid:disabled:hover { background: #fff; }
 .btn-ghost { border-color: var(--line); color: #fff; padding: 0 22px; font-weight: 400; }
 .btn-ghost:hover { border-color: rgba(255, 255, 255, 0.6); }
 .btn-sm { height: 40px; padding: 0 20px; font-size: 15px; }

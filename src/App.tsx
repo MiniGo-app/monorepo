@@ -22,8 +22,8 @@ export function App() {
         </a>
       </div>
 
-      <Dialog open={openDialog === "try"} onClose={close} titleId="tryTitle" title="Android build coming soon">
-        <p className="dlg-note">The Android build is coming soon. It will run on Stellar testnet, where funds have no real value.</p>
+      <Dialog open={openDialog === "try"} onClose={close} titleId="tryTitle" title="Download MiniGo for Android">
+        <p className="dlg-note">This Android build runs on Stellar testnet, where funds have no real value.</p>
         <ol>
           <li>
             On your Android phone, download the <strong>MiniGo app</strong> (an APK file).
@@ -33,9 +33,9 @@ export function App() {
         </ol>
         <p className="dlg-note dlg-foot">An iPhone build is planned.</p>
         <div className="dlg-actions">
-          <button className="btn btn-solid btn-sm" type="button" disabled>
-            Download coming soon
-          </button>
+          <a className="btn btn-solid btn-sm" href="https://minigo.app/minigo.apk" download="minigo.apk">
+            Download APK
+          </a>
           <button className="btn btn-ghost btn-sm" type="button" onClick={close}>
             Close
           </button>

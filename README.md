@@ -26,5 +26,5 @@ The carousel pauses when hovered, when the video is open or when the tab is hidd
 
 ## Before launch
 
-- Add the Android download when a public APK is available. Add an iPhone link when there is a build to share.
+- `public/minigo.apk` serves the Android testnet build at `https://minigo.app/minigo.apk`. Replace it when a newer build is ready. Git LFS tracks the APK because it exceeds GitHub's regular file limit. Add an iPhone link when there is a build to share.
 - Point GitHub links to the app repository once it is public. They currently open the organization page.
